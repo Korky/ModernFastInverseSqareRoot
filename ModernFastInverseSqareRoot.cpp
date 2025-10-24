@@ -34,7 +34,7 @@ T FastInverseSqrt(T number) {
 	return y;
 }
 
-// SMID Version
+// SIMD Version
 [[nodiscard]] inline float FastInvSqrtSIMD(float number) {
 	__m128 input = _mm_set_ss(number);              // Set the input as a single float
 	__m128 approx = _mm_rsqrt_ss(input);       // Fast approximate inverse sqrt
