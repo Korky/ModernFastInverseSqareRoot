@@ -72,53 +72,88 @@ int main() {
 	std::cout << "Check: 1/sqrt(" << number << ") = " << invSqrtStd << "\n";
 
 
-	// Speed Test
-	constexpr size_t numSamples = 1'000'000;
-	std::vector<float> inputs(numSamples);
+// ---------------------------------------------------------------------
+// Benchmark each algorithm on the same input set.  The goal is to
+// give every implementation a fair comparison by:
+//   * Using the same input vector for all runs.
+//   * Reusing pre‑allocated result buffers so allocation overhead is
+//     not counted in timings.
+//   * Measuring with steady_clock and keeping the loop body identical.
+// ---------------------------------------------------------------------
 
-	// Fill with random positive floats
-	std::mt19937 rng(42);
-	std::uniform_real_distribution<float> dist(0.1f, 1000.0f);
-	for (auto& val : inputs)
-		val = dist(rng);
+constexpr size_t numSamples = 1'000'000; // number of random values per run
+std::vector<float> inputs(numSamples);
 
-	std::vector<float> resultsQ3(numSamples);
-	std::vector<float> resultsSIMD(numSamples);
-	std::vector<float> resultsSTD(numSamples);
+// Fill with random positive floats – seed is fixed for reproducibility.
+std::mt19937 rng(42);
+std::uniform_real_distribution<float> dist(0.1f, 1000.0f);
+for (auto& val : inputs)
+    val = dist(rng);
 
+// Allocate result buffers once; each algorithm writes to its own buffer.
+std::vector<float> resultsQ3(numSamples), resultsSIMD(numSamples), resultsSTD(numSamples);
 
-	// Measure SIMD time
-	auto t1 = std::chrono::high_resolution_clock::now();
-	for (size_t i = 0; i < numSamples; ++i) {
-		resultsSIMD[i] = FastInvSqrtSIMD(inputs[i]);
-	}
-	auto t2 = std::chrono::high_resolution_clock::now();
+// Helper lambda that times a single algorithm and writes into the
+// provided output vector.  The function pointer is kept simple for
+// readability; we could template it but the small number of
+// implementations keeps the code straightforward.
+auto benchmark = [&](const char* /*name*/, float (*func)(float), std::vector<float>& out) {
+    auto start = std::chrono::steady_clock::now();
+    for (size_t i = 0; i < numSamples; ++i)
+        out[i] = func(inputs[i]);
+    return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+};
 
-	// Measure q3 sqrt time
-	auto t3 = std::chrono::high_resolution_clock::now();
-	for (size_t i = 0; i < numSamples; ++i) {
-		resultsQ3[i] = FastInverseSqrt(inputs[i]);
-	}
-	auto t4 = std::chrono::high_resolution_clock::now();
-	
-	// Measure std sqrt time
-	auto t5 = std::chrono::high_resolution_clock::now();
-	for (size_t i = 0; i < numSamples; ++i) {
-		resultsSTD[i] = InvSqrtStd(inputs[i]);
-	}
-	auto t6 = std::chrono::high_resolution_clock::now();
+// Run each algorithm separately and collect times.
+double simdTime = benchmark("SIMD", FastInvSqrtSIMD, resultsSIMD);
+double q3Time   = benchmark("Quake3", FastInverseSqrt<float>, resultsQ3);
+double stdTime  = benchmark("Std", InvSqrtStd, resultsSTD);
 
-
-	auto simdTime = std::chrono::duration<double, std::milli>(t2 - t1).count();
-	auto q3Time = std::chrono::duration<double, std::milli>(t4 - t3).count();
-	auto stdTime = std::chrono::duration<double, std::milli>(t6 - t5).count();
+// Prevent compiler from eliminating the loops by using a checksum.
+auto checksum = [](const std::vector<float>& v) {
+    double sum = 0.0;
+    for (float f : v)
+        sum += static_cast<double>(f);
+    return sum;
+};
+double simdSum = checksum(resultsSIMD);
+double q3Sum   = checksum(resultsQ3);
+double stdSum  = checksum(resultsSTD);
 
 	std::cout << std::fixed << std::setprecision(4);
 	std::cout << "SIMD Time:\t\t" << simdTime << " ms\n";
 	std::cout << "Quake3 Time:\t\t" << q3Time << " ms\n";
-	std::cout << "std::sqrt Time:\t\t" << stdTime << " ms\n";
+    std::cout << "std::sqrt Time:\t\t" << stdTime << " ms\n";
 
+    // Print checksums to keep the compiler from optimizing away the loops
+    std::cout << "Checksums -> SIMD: " << simdSum
+              << ", Quake3: " << q3Sum
+              << ", Std: " << stdSum << '\n';
 
-	return 0;
+    // Compute error metrics relative to the standard implementation.
+    auto compute_error = [&](const std::vector<float>& approx) {
+        double max_err = 0.0;
+        double sum_err = 0.0;
+        for (size_t i = 0; i < numSamples; ++i) {
+            double err = std::abs(approx[i] - resultsSTD[i]);
+            sum_err += err;
+            if (err > max_err)
+                max_err = err;
+        }
+        return std::make_pair(sum_err / numSamples, max_err);
+    };
+
+    auto [simdMeanErr, simdMaxErr] = compute_error(resultsSIMD);
+    auto [q3MeanErr, q3MaxErr]     = compute_error(resultsQ3);
+    auto [stdMeanErr, stdMaxErr]   = compute_error(resultsSTD); // zero
+
+    std::cout << "Avg error -> SIMD: " << simdMeanErr
+              << ", Quake3: " << q3MeanErr
+              << ", Std: " << stdMeanErr << '\n';
+    std::cout << "Max error -> SIMD: " << simdMaxErr
+              << ", Quake3: " << q3MaxErr
+              << ", Std: " << stdMaxErr << '\n';
+
+    return 0;
 }
 
