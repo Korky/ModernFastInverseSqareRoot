@@ -18,4 +18,11 @@ if (CMAKE_VERSION VERSION_GREATER 3.12)
   set_property(TARGET ModernFastInverseSqareRoot PROPERTY CXX_STANDARD 20)
 endif()
 
+# Ensure consistent optimisation level across all build types.
+# MSVC uses /O2 for optimization, GCC/Clang use -O2.
+target_compile_options(ModernFastInverseSqareRoot
+    PRIVATE
+        "$<$<CXX_COMPILER_ID:MSVC>:/O2>$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-O2>"
+)
+
 # TODO: Add tests and install targets if needed.
