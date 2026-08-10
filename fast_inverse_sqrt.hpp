@@ -17,10 +17,25 @@ namespace fisq {
 /// @return Approximate 1/sqrt(number).
 ///
 template <std::floating_point T>
-constexpr T FastInverseSqrt(T number);
+inline constexpr T FastInverseSqrt(T number) {
+    static_assert(sizeof(T) == 4, "FastInverseSqrt only supports 32‑bit floats");
+    constexpr T threehalfs = static_cast<T>(1.5);
+
+    T x2 = number * static_cast<T>(0.5);
+    T y = number;
+
+    // Reinterpret float bits as int
+    uint32_t i = std::bit_cast<uint32_t>(y);
+    i = 0x5f3759df - (i >> 1);  // magic number and bit shift
+
+    y = std::bit_cast<T>(i);
+    // One iteration of Newton–Raphson
+    y = y * (threehalfs - (x2 * y * y));
+    return y;
+}
 
 /// SIMD accelerated fast inverse square root using SSE intrinsics.
 /// 
-[[nodiscard]] inline float FastInverseSqrtSIMD(float number);
+[[nodiscard]] float FastInverseSqrtSIMD(float number);
 
 } // namespace fisq
