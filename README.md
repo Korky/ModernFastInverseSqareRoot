@@ -74,21 +74,43 @@ Typical output (on a recent Intel CPU) looks like this, including timing and err
 ```
 Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 4.1344
+Total elapsed time (ms): 3.3440
 
 Time
-Quake3(C++20):  4.5040e-01 ms   (avg=4.5040e-01 ns)
-SIMD:           1.1505e+00 ms   (avg=1.1505e+00 ns)
-AVX2:           1.2327e+00 ms   (avg=1.2327e+00 ns)
-Std:            1.3008e+00 ms
+Q3(C++20):      4.4800e-01 ms   (avg=4.4800e-01 ns)
+Q3(SIMD):       1.4953e+00 ms   (avg=1.4953e+00 ns)
+InvSqrtSIMD:    1.1866e+00 ms   (avg=1.1866e+00 ns)
+Std:            1.4007e+00 ms
 
 Error metrics
                 mean_abs,               max_abs,                mean_rel
-Quake3(C++20):  0x1.f2fc99f559b3dp-15,  0x1.47ec000000000p-8,   0x1.f82dc8846a928p-11
-SIMD:           0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
-AVX2:           0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+Q3(C++20):      0x1.f2fc97efe0ce1p-15,  0x1.47ec000000000p-8,   0x1.f82dc4cee149ap-11
+Q3(SIMD):       0x1.3e75bc44bf4cbp-29,  0x1.0000000000000p-21,  0x1.39df740d6494dp-25
+InvSqrtSIMD:    0x1.91c80a2877ee5p-18,  0x1.7a60000000000p-11,  0x1.8ded4c7a47243p-14
 
-Checksums -> Quake3 (C++20): 0x1.e85653b85bc00p+15, SIMD: 0x1.e8cd4b14cba00p+15, AVX2: 0x1.e8cd4b14cba00p+15, Std: 0x1.e8cd4b7383a00p+15
+Checksums -> Q3 (C++20): 0x1.e85653c9d2000p+15, Q3(SIMD): 0x1.e8cd4b2584400p+15, InvSqrtSIMD: 0x1.e8cd509700000p+15, Std: 0x1.e8cd4b8475800p+15
+```
+or with AVX
+```
+Warm-up iterations: 5
+Iterations per function: 1000000
+Total elapsed time (ms): 4.3089
+
+Time
+Q3(C++20):      4.7490e-01 ms   (avg=4.7490e-01 ns)
+Q3(SIMD):       1.1170e+00 ms   (avg=1.1170e+00 ns)
+InvSqrtSIMD:    1.1112e+00 ms   (avg=1.1112e+00 ns)
+Q3(AVX2):       1.4376e+00 ms   (avg=1.4376e+00 ns)
+Std:            1.2794e+00 ms
+
+Error metrics
+                mean_abs,               max_abs,                mean_rel
+Q3(C++20):      0x1.f2fc99f559b3dp-15,  0x1.47ec000000000p-8,   0x1.f82dc8846a928p-11
+Q3(SIMD):       0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+InvSqrtSIMD:    0x1.91c5b673c4f3cp-18,  0x1.7a60000000000p-11,  0x1.8decd52429cb0p-14
+Q3(AVX2):       0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+
+Checksums -> Q3 (C++20): 0x1.e85653b85bc00p+15, Q3(SIMD): 0x1.e8cd4b14cba00p+15, InvSqrtSIMD: 0x1.e8cd50d000000p+15, Q3(AVX2): 0x1.e8cd4b14cba00p+15, Std: 0x1.e8cd4b7383a00p+15
 ```
 
 The benchmark demonstrates that the SIMD variant is roughly 30 % faster than the classic implementation and comparable to the standard library.

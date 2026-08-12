@@ -9,39 +9,48 @@
 
 namespace fisq {
 
-/// 
-/// Fast inverse square root for 32‑bit floating point numbers.
-///
-/// @tparam T must be a floating‑point type with size 4 bytes (i.e. `float`).
-/// @param number The value to compute the inverse sqrt of.
-/// @return Approximate 1/sqrt(number).
-///
-template <std::floating_point T>
-inline constexpr T FastInverseSqrt(T number) {
-    static_assert(sizeof(T) == 4, "FastInverseSqrt only supports 32-bit floats");
-    constexpr T threehalfs = static_cast<T>(1.5);
+    /// 
+    /// Fast inverse square root for 32‑bit floating point numbers.
+    ///
+    /// @tparam T must be a floating‑point type with size 4 bytes (i.e. `float`).
+    /// @param number The value to compute the inverse sqrt of.
+    /// @return Approximate 1/sqrt(number).
+    ///
+    template <std::floating_point T>
+    inline constexpr T FastInverseSqrt(T number) {
+        static_assert(sizeof(T) == 4, "FastInverseSqrt only supports 32-bit floats");
+        constexpr T threehalfs = static_cast<T>(1.5);
 
-    T x2 = number * static_cast<T>(0.5);
-    T y = number;
+        T x2 = number * static_cast<T>(0.5);
+        T y = number;
 
-    // Reinterpret float bits as int
-    uint32_t i = std::bit_cast<uint32_t>(y);
-    i = 0x5f3759df - (i >> 1);  // magic number and bit shift
+        // Reinterpret float bits as int
+        uint32_t i = std::bit_cast<uint32_t>(y);
+        i = 0x5f3759df - (i >> 1);  // magic number and bit shift
 
-    y = std::bit_cast<T>(i);
-    // One iteration of Newton–Raphson
-    y = y * (threehalfs - (x2 * y * y));
-    return y;
-}
+        y = std::bit_cast<T>(i);
+        // One iteration of Newton–Raphson
+        y = y * (threehalfs - (x2 * y * y));
+        return y;
+    }
 
-/// SIMD accelerated fast inverse square root using SSE intrinsics.
-/// 
-[[nodiscard]] float FastInverseSqrtSIMD(float number);
-// The AVX2 implementation is only available when the compiler supports
-// the corresponding instruction set.  Guard the declaration to avoid
-// unresolved symbols on targets that cannot compile it.
+    /// SIMD accelerated fast inverse square root using Newton–Raphson method with SSE intrinsics.
+    ///
+    /// @param number The value to compute the inverse sqrt of.
+    /// @return Approximate 1/sqrt(number).
+    ///
+    [[nodiscard]] float FastInverseSqrtSIMD(float number);
+    /// SIMD accelerated inverse square root using architecture-specific SIMD intrinsics directly.
+    ///
+    /// @param number The value to compute the inverse sqrt of.
+    /// @return Approximate 1/sqrt(number).
+    [[nodiscard]] float InverseSqrtSIMD(float number);
+    
+    // The AVX2 implementation is only available when the compiler supports
+    // the corresponding instruction set.  Guard the declaration to avoid
+    // unresolved symbols on targets that cannot compile it.
 #if defined(__AVX__) && defined(__AVX2__)
-[[nodiscard]] float FastInverseSqrtAVX2(float number);
+    [[nodiscard]] float FastInverseSqrtAVX2(float number);
 #endif
 
 } // namespace fisq
