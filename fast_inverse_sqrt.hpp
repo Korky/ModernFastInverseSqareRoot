@@ -46,11 +46,14 @@ namespace fisq {
     /// @return Approximate 1/sqrt(number).
     [[nodiscard]] float InverseSqrtSIMD(float number);
     
-    // The AVX2 implementation is only available when the compiler supports
+    // The AVX2 & AVX512 implementation is only available when the compiler supports
     // the corresponding instruction set.  Guard the declaration to avoid
     // unresolved symbols on targets that cannot compile it.
-#if defined(__AVX512F__)
+#if defined(__AVX__) && defined(__AVX2__)
     [[nodiscard]] float FastInverseSqrtAVX2(float number);
+    inline void FastInverseSqrtAVX2Batch(const float* src, float* dst, size_t n);
+#endif
+#if defined(__AVX512F__)
     [[nodiscard]] float FastInverseSqrtAVX512(float number);
     inline void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n);
 #endif

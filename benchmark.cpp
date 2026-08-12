@@ -98,32 +98,31 @@ int main() {
     std::cout<< "Time\n";
     std::cout << "Q3(C++20):\t" << tQ3 << " ms\t(avg=" << avgQ3_ns << " ns)\n";
     std::cout << "Q3(SIMD):\t" << tSIMD << " ms\t(avg=" << avgSIMD_ns << " ns)\n";
-    std::cout << "InvSqrtSIMD:\t" << tINV << " ms\t(avg=" << (tINV * 1e6 / numSamples) << " ns)\n";
 #if defined(__AVX512F__)
     std::cout << "Q3(AVX512):\t" << tAVX512 << " ms\t(avg=" << avgAVX512_ns << " ns)\n";
 #endif
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << "Q3(AVX2):\t" << tAVX << " ms\t(avg=" << avgAVX_ns << " ns)\n";
 #endif
+    std::cout << "RSqrt(SIMD):\t" << tINV << " ms\t(avg=" << (tINV * 1e6 / numSamples) << " ns)\n";
     std::cout << "Std:\t\t" << tStd << " ms\n";
 
     std::cout.setf(std::ios::fixed); std::cout << std::setprecision(6);
     std::cout << "\nError metrics\n\t\tmean_abs,\t\tmax_abs,\t\tmean_rel\n";
     std::cout << "Q3(C++20):\t" << q3_mean_abs << ",\t" << q3_max_abs << ",\t" << q3_mean_rel << '\n';
     std::cout << "Q3(SIMD):\t" << simd_mean_abs << ",\t" << simd_max_abs << ",\t" << simd_mean_rel << '\n';
-    std::cout << "InvSqrtSIMD:\t" << inv_mean_abs << ",\t" << inv_max_abs << ",\t" << inv_mean_rel << '\n';
 #if defined(__AVX512F__)
     std::cout << "Q3(AVX512):\t" << avx512_mean_abs << ",\t" << avx512_max_abs << ",\t" << avx512_mean_rel << '\n';
 #endif
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << "Q3(AVX2):\t" << avx_mean_abs << ",\t" << avx_max_abs << ",\t" << avx_mean_rel << '\n';
 #endif
-
+    std::cout << "RSqrt(SIMD):\t" << inv_mean_abs << ",\t" << inv_max_abs << ",\t" << inv_mean_rel << '\n';
      std::cout << '\n' << "Checksums -> Q3 (C++20): " << checksum(q3)
-              << ", Q3(SIMD): " << checksum(simd) << ", InvSqrtSIMD: " << checksum(inv);
+              << ", Q3(SIMD): " << checksum(simd) << ", RSqrt(SIMD): " << checksum(inv);
 #if defined(__AVX512F__)
     std::cout << ", Q3(AVX512): " << checksum(avx512);
-#endif
+#endif  
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << ", Q3(AVX2): " << checksum(avx);
 #endif
