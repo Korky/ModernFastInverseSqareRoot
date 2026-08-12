@@ -26,7 +26,27 @@ namespace fisq {
         float result = _mm_cvtss_f32(refined);
         return result;
     }
+    [[nodiscard]] inline __m128 FastInverseSqrtSIMDBatch(__m128 number) {
 
+        const __m128 approx = _mm_rsqrt_ss(number); // Approximate 1/√x using hardware instruction
+
+        static const __m128 half  = _mm_set_ss(0.5f);      // Half value for Newton–Raphson
+        static const __m128 three = _mm_set_ss(1.5f);      // Three‑half constant
+
+        // Newton–Raphson refinement: y * (3 – n*y²) / 2
+        __m128 number_half = _mm_mul_ss(number, half);
+        __m128 approx_sq   = _mm_mul_ss(approx, approx);
+        __m128 mult        = _mm_mul_ss(number_half, approx_sq);
+        __m128 nr          = _mm_sub_ss(three, mult);
+        return _mm_mul_ss(approx, nr);
+    }
+    inline void FastInverseSqrtSIMDBatch(const float* src, float* dst, size_t n) { // n must be a multiple of 4
+        for (size_t i = 0; i < n; i += 4) {
+            const __m128 input  = _mm_loadu_ps(src + i); // Load 4 floats
+            const __m128 result = FastInverseSqrtSIMDBatch(input);
+            _mm_storeu_ps(dst + i, result); // Store 4 results
+        }
+    }
     [[nodiscard]] float InverseSqrtSIMD(float number) {
         __m128 reg = _mm_set_ss(number);
         reg = _mm_rsqrt_ss(reg);   // Hardware reciprocal sqrt (approximate)
