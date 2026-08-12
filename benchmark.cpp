@@ -78,34 +78,34 @@ int main() {
 #endif
     totalTime += tStd;
 
-    std::cout << "Total elapsed time (ms): " << totalTime << '\n';
+    std::cout << "Total elapsed time (ms): " << totalTime << "\n\n";
     std::cout << std::scientific;
     double avgQ3_ns = tQ3 * 1e6 / numSamples;
     double avgSIMD_ns = tSIMD * 1e6 / numSamples;
 #if defined(__AVX__) && defined(__AVX2__)
     double avgAVX_ns = tAVX * 1e6 / numSamples;
 #endif
-    std::cout << "Quake3 Time:\t" << tQ3 << " ms\t(avg=" << avgQ3_ns << " ns)\n";
-    std::cout << "SIMD Time:\t" << tSIMD << " ms\t(avg=" << avgSIMD_ns << " ns)\n";
+    std::cout<< "Time\n";
+    std::cout << "Quake3(C++20):\t" << tQ3 << " ms\t(avg=" << avgQ3_ns << " ns)\n";
+    std::cout << "SIMD:\t\t" << tSIMD << " ms\t(avg=" << avgSIMD_ns << " ns)\n";
 #if defined(__AVX__) && defined(__AVX2__)
-    std::cout << "AVX2 Time:\t" << tAVX << " ms\t(avg=" << avgAVX_ns << " ns)\n";
+    std::cout << "AVX2:\t\t" << tAVX << " ms\t(avg=" << avgAVX_ns << " ns)\n";
 #endif
-    std::cout << "Std Time:\t" << tStd << " ms\n";
+    std::cout << "Std:\t\t" << tStd << " ms\n";
 
-    std::cout << '\n' << "Checksums -> Quake3: " << checksum(q3)
+    std::cout.setf(std::ios::fixed); std::cout << std::setprecision(6);
+    std::cout << "\nError metrics\n\t\tmean_abs,\t\tmax_abs,\t\tmean_rel\n";
+    std::cout << "Quake3(C++20):\t" << q3_mean_abs << ",\t" << q3_max_abs << ",\t" << q3_mean_rel << '\n';
+    std::cout << "SIMD:\t\t" << simd_mean_abs << ",\t" << simd_max_abs << ",\t" << simd_mean_rel << '\n';
+#if defined(__AVX__) && defined(__AVX2__)
+    std::cout << "AVX2:\t\t" << avx_mean_abs << ",\t" << avx_max_abs << ",\t" << avx_mean_rel << '\n';
+#endif
+
+     std::cout << '\n' << "Checksums -> Quake3 (C++20): " << checksum(q3)
               << ", SIMD: " << checksum(simd);
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << ", AVX2: " << checksum(avx);
 #endif
     std::cout << ", Std: " << checksum(stdv) << '\n';
-
-    std::cout.setf(std::ios::fixed); std::cout << std::setprecision(6);
-    std::cout << "Error metrics\n\tmean_abs,\t\tmax_abs,\t\tmean_rel\n";
-    std::cout << "Quake3:\t" << q3_mean_abs << ",\t" << q3_max_abs << ",\t" << q3_mean_rel << '\n';
-    std::cout << "SIMD:\t" << simd_mean_abs << ",\t" << simd_max_abs << ",\t" << simd_mean_rel << '\n';
-#if defined(__AVX__) && defined(__AVX2__)
-    std::cout << "AVX2:\t" << avx_mean_abs << ",\t" << avx_max_abs << ",\t" << avx_mean_rel << '\n';
-#endif
-
     return 0;
 }

@@ -24,7 +24,7 @@ cmake --preset x64-release
 cmake --build out/build/x64-release --config Release
 ```
 
-The presets automatically set the appropriate compiler (`cl.exe` on Windows, `clang++`/`g++` elsewhere) and enable C++20.  If you prefer to use a custom build directory or configuration, you can replace the preset commands with standard CMake arguments.
+The presets automatically set the appropriate compiler (`clang-cl.exe` on Windows, `clang++`/`g++` elsewhere) and enable C++20.  If you prefer to use a custom build directory or configuration, you can replace the preset commands with standard CMake arguments.
 
 ## Usage Example
 
@@ -74,16 +74,21 @@ Typical output (on a recent Intel CPU) looks like this, including timing and err
 ```
 Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 28.4745
-Quake3 Time:    1.2649e+01 ms   (avg=1.2649e+01 ns)
-SIMD Time:      6.4655e+00 ms   (avg=6.4655e+00 ns)
-Std Time:       9.3600e+00 ms
+Total elapsed time (ms): 4.1344
 
-Checksums -> Quake3: 6.2507e+04, SIMD: 6.2567e+04, Std: 6.2567e+04
+Time
+Quake3(C++20):  4.5040e-01 ms   (avg=4.5040e-01 ns)
+SIMD:           1.1505e+00 ms   (avg=1.1505e+00 ns)
+AVX2:           1.2327e+00 ms   (avg=1.2327e+00 ns)
+Std:            1.3008e+00 ms
+
 Error metrics
-        mean_abs,               max_abs,                mean_rel
-Quake3: 0x1.f2fc97efe0ce1p-15,  0x1.47ec000000000p-8,   0x1.f82dc4cee149ap-11
-SIMD:   0x1.3e75bc44bf4cbp-29,  0x1.0000000000000p-21,  0x1.39df740d6494dp-25
+                mean_abs,               max_abs,                mean_rel
+Quake3(C++20):  0x1.f2fc99f559b3dp-15,  0x1.47ec000000000p-8,   0x1.f82dc8846a928p-11
+SIMD:           0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+AVX2:           0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+
+Checksums -> Quake3 (C++20): 0x1.e85653b85bc00p+15, SIMD: 0x1.e8cd4b14cba00p+15, AVX2: 0x1.e8cd4b14cba00p+15, Std: 0x1.e8cd4b7383a00p+15
 ```
 
 The benchmark demonstrates that the SIMD variant is roughly 30 % faster than the classic implementation and comparable to the standard library.

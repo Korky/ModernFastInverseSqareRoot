@@ -25,8 +25,6 @@ namespace fisq {
     __m128 approx_sq   = _mm_mul_ss(approx, approx);
 
     // Newton‑Raphson: y * (1.5 - 0.5*n*y^2)
-   // __m128 tmp     = _mm_mul_ss(number_half, approx_sq);
-   // __m128 refined = _mm_fmsubadd_ss(approx, tmp, three);
     __m128 mult        = _mm_mul_ss(number_half, approx_sq);
     __m128 nr          = _mm_sub_ss(three, mult);
     __m128 refined     = _mm_mul_ss(approx, nr);
@@ -49,8 +47,8 @@ namespace fisq {
     __m256 input = _mm256_set1_ps(number);
     __m256 approx = _mm256_rsqrt_ps(input);
 
-    const __m256 half  = _mm256_set1_ps(0.5f);
-    const __m256 three = _mm256_set1_ps(1.5f);
+    static const __m256 half  = _mm256_set1_ps(0.5f);
+    static const __m256 three = _mm256_set1_ps(1.5f);
     __m256 number_half = _mm256_mul_ps(input, half);
     __m256 approx_sq   = _mm256_mul_ps(approx, approx);
     __m256 mult        = _mm256_mul_ps(number_half, approx_sq);

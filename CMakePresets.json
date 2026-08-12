@@ -8,8 +8,9 @@
             "binaryDir": "${sourceDir}/out/build/${presetName}",
             "installDir": "${sourceDir}/out/install/${presetName}",
             "cacheVariables": {
-                "CMAKE_C_COMPILER": "clang-cl.exe",
-                "CMAKE_CXX_COMPILER": "clang-cl.exe"
+                "CMAKE_CXX_COMPILER": "clang-cl.exe",
+                "CMAKE_CXX_STANDARD": "20",
+                "CMAKE_CXX_FLAGS_RELEASE": "/O2 /arch:AVX512"
             },
             "condition": {
                 "type": "equals",
