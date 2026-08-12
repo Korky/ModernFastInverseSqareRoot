@@ -2,6 +2,9 @@ cmake_minimum_required(VERSION 3.11)
 
 project(ModernFastInverseSqareRoot LANGUAGES CXX)
 
+# Enable generation of compile_commands.json for clangd support.
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+
 # No external test framework is required; a lightweight custom test harness
 # will be used instead.
 
@@ -41,5 +44,11 @@ target_compile_options(fisq
         "$<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/RTC0>"
         # For non-MSVC compilers, use -O2 in all configurations
         "$<$<NOT:$<CXX_COMPILER_ID:MSVC>>:-O2>"
+        # Ensure at least SSE3 support for the RSQRTSS intrinsic used by the
+        # SIMD implementation.  GCC/Clang honour this flag on x86_64.
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-msse3>"
+        # Enable AVX2 only if the compiler supports it; GCC/Clang honour
+        # this flag on x86_64.
+        "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-mavx2>"
 )
 

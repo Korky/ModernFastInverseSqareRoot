@@ -60,27 +60,30 @@ Compile with a C++20 compiler and link against the static library `fisq.lib` (or
 
 ## Benchmarks
 
-The repository ships a small benchmark program that measures the execution time of:
+The repository ships a small benchmark program that measures the execution **time** and, starting with this update, also prints detailed error metrics for each fast‑inverse‑sqrt implementation.
 * The classic Quake III implementation (`FastInverseSqrt`).
 * The SIMD‑accelerated version (`FastInverseSqrtSIMD`).
 * The standard library `1 / sqrtf`.
 
-To run the benchmark after building:
 
 ```bash
 out/build/x64-release/benchmark.exe
 ```
-
-Typical output (on a recent Intel CPU) looks like this:
+Typical output (on a recent Intel CPU) looks like this, including timing and error metrics:
 
 ```
-Warm‑up iterations: 5
+Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 8.4940
-SIMD Time:\t2.3496e+00 ms\t(avg=2.3496e+00 ns)
-Quake3 Time:\t3.0609e+00 ms\t(avg=3.0609e+00 ns)
-Std Time:\t3.0835e+00 ms\t(avg=3.0835e+00 ns)
-Checksums -> SIMD: 6.2567e+04, Quake3: 6.2507e+04, Std: 6.2567e+04
+Total elapsed time (ms): 74.5122
+Quake3 Time:    2.1690e+01 ms   (avg=2.1690e+01 ns)
+SIMD Time:      3.9054e+01 ms   (avg=3.9054e+01 ns)
+Std Time:       1.3768e+01 ms
+
+Checksums -> Quake3: 6.2507e+04, SIMD: 6.2567e+04, Std: 6.2567e+04
+Error metrics
+        mean_abs,               max_abs,                mean_rel
+Quake3: 0x1.f2fc97efe0ce1p-15,  0x1.47ec000000000p-8,   0x1.f82dc4cee149ap-11
+SIMD:   0x1.3e75bc44bf4cbp-29,  0x1.0000000000000p-21,  0x1.39df740d6494dp-25
 ```
 
 The benchmark demonstrates that the SIMD variant is roughly 30 % faster than the classic implementation and comparable to the standard library.

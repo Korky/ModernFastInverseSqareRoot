@@ -18,7 +18,7 @@ namespace fisq {
 ///
 template <std::floating_point T>
 inline constexpr T FastInverseSqrt(T number) {
-    static_assert(sizeof(T) == 4, "FastInverseSqrt only supports 32‑bit floats");
+    static_assert(sizeof(T) == 4, "FastInverseSqrt only supports 32-bit floats");
     constexpr T threehalfs = static_cast<T>(1.5);
 
     T x2 = number * static_cast<T>(0.5);
@@ -37,5 +37,11 @@ inline constexpr T FastInverseSqrt(T number) {
 /// SIMD accelerated fast inverse square root using SSE intrinsics.
 /// 
 [[nodiscard]] float FastInverseSqrtSIMD(float number);
+// The AVX2 implementation is only available when the compiler supports
+// the corresponding instruction set.  Guard the declaration to avoid
+// unresolved symbols on targets that cannot compile it.
+#if defined(__AVX__) && defined(__AVX2__)
+[[nodiscard]] float FastInverseSqrtAVX2(float number);
+#endif
 
 } // namespace fisq

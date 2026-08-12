@@ -2,7 +2,15 @@
 // Implementation of the fast inverse‑sqrt algorithms.
 
 #include "fast_inverse_sqrt.hpp"
-#include <xmmintrin.h> // SSE intrinsics
+// SSE and AVX intrinsics are used conditionally. The header is always
+// available on x86_64 compilers, but the implementation will only use it
+// when the corresponding compiler flags enable the instruction set.
+// Intrinsic headers – included before the namespace to avoid namespaced
+// declarations of global intrinsics.
+#include <xmmintrin.h> // SSE intrinsics (SSE3)
+#if defined(__AVX__) && defined(__AVX2__)
+#include <immintrin.h>
+#endif
 
 namespace fisq {
 
@@ -25,3 +33,32 @@ namespace fisq {
 }
 
 } // namespace fisq
+
+// ------------------------------------------------------------------
+// AVX2 implementation – only compiled when the target supports AVX2.
+// ------------------------------------------------------------------
+#if defined(__AVX__) && defined(__AVX2__)
+
+namespace fisq {
+
+[[nodiscard]] float FastInverseSqrtAVX2(float number) {
+    // Broadcast the input to all lanes of a 256‑bit vector.
+    __m256 input = _mm256_set1_ps(number);
+    __m256 approx = _mm256_rsqrt_ps(input);
+
+    const __m256 half  = _mm256_set1_ps(0.5f);
+    const __m256 three = _mm256_set1_ps(1.5f);
+    __m256 number_half = _mm256_mul_ps(input, half);
+    __m256 approx_sq   = _mm256_mul_ps(approx, approx);
+    __m256 mult        = _mm256_mul_ps(number_half, approx_sq);
+    __m256 nr          = _mm256_sub_ps(three, mult);
+    __m256 refined     = _mm256_mul_ps(approx, nr);
+
+    // Store the result to a stack array and return the first element.
+    alignas(32) float res[8];
+    _mm256_store_ps(res, refined);
+    return res[0];
+}
+
+} // namespace fisq
+#endif
