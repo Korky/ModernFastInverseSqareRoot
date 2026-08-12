@@ -74,10 +74,10 @@ Typical output (on a recent Intel CPU) looks like this, including timing and err
 ```
 Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 74.5122
-Quake3 Time:    2.1690e+01 ms   (avg=2.1690e+01 ns)
-SIMD Time:      3.9054e+01 ms   (avg=3.9054e+01 ns)
-Std Time:       1.3768e+01 ms
+Total elapsed time (ms): 28.4745
+Quake3 Time:    1.2649e+01 ms   (avg=1.2649e+01 ns)
+SIMD Time:      6.4655e+00 ms   (avg=6.4655e+00 ns)
+Std Time:       9.3600e+00 ms
 
 Checksums -> Quake3: 6.2507e+04, SIMD: 6.2567e+04, Std: 6.2567e+04
 Error metrics

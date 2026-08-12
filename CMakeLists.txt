@@ -50,5 +50,9 @@ target_compile_options(fisq
         # Enable AVX2 only if the compiler supports it; GCC/Clang honour
         # this flag on x86_64.
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-mavx2>"
+        # Enable native architecture optimisations for GCC/Clang
+        $<$<CXX_COMPILER_ID:GNU,Clang>:-march=native>
+        # MSVC
+        $<$<CXX_COMPILER_ID:MSVC>:/arch:AVX2>
 )
 

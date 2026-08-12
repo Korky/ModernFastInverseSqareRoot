@@ -19,16 +19,19 @@ namespace fisq {
     __m128 approx = _mm_rsqrt_ss(input);            // Fast approximate inverse sqrt
 
     // Newton‑Raphson refinement for improved precision
-    const __m128 half  = _mm_set_ss(0.5f);
-    const __m128 three = _mm_set_ss(1.5f);
+    static const __m128 half  = _mm_set_ss(0.5f);
+    static const __m128 three = _mm_set_ss(1.5f);
     __m128 number_half = _mm_mul_ss(input, half);
     __m128 approx_sq   = _mm_mul_ss(approx, approx);
+
+    // Newton‑Raphson: y * (1.5 - 0.5*n*y^2)
+   // __m128 tmp     = _mm_mul_ss(number_half, approx_sq);
+   // __m128 refined = _mm_fmsubadd_ss(approx, tmp, three);
     __m128 mult        = _mm_mul_ss(number_half, approx_sq);
     __m128 nr          = _mm_sub_ss(three, mult);
     __m128 refined     = _mm_mul_ss(approx, nr);
 
-    float result;
-    _mm_store_ss(&result, refined);
+    float result = _mm_cvtss_f32(refined);
     return result;
 }
 
