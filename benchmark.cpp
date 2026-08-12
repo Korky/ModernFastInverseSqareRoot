@@ -18,7 +18,7 @@ int main() {
     std::vector<float> inputs(numSamples);
     for (auto &v : inputs) v = dist(rng);
 
-    std::vector<float> q3(numSamples), simd(numSamples), avx(numSamples), stdv(numSamples), inv(numSamples);
+    std::vector<float> q3(numSamples), simd(numSamples), avx(numSamples), stdv(numSamples), inv(numSamples), avx512(numSamples);
 
     auto bench = [&](float (*func)(float), std::vector<float> &out) {
         volatile float dummy = 0.f;
@@ -33,6 +33,9 @@ int main() {
     double tQ3   = bench(fisq::FastInverseSqrt<float>, q3);
     double tSIMD = bench(fisq::FastInverseSqrtSIMD, simd);
     double tINV  = bench(fisq::InverseSqrtSIMD, inv);
+#if defined(__AVX512F__)
+    double tAVX512 = bench(fisq::FastInverseSqrtAVX512, avx512);
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     double tAVX  = bench(fisq::FastInverseSqrtAVX2, avx);
 #endif
@@ -65,6 +68,9 @@ int main() {
     auto [q3_mean_abs, q3_max_abs, q3_mean_rel] = compute_error(q3, stdv);
     auto [simd_mean_abs, simd_max_abs, simd_mean_rel] = compute_error(simd, stdv);
     auto [inv_mean_abs, inv_max_abs, inv_mean_rel] = compute_error(inv, stdv);
+#if defined(__AVX512F__)
+    auto [avx512_mean_abs, avx512_max_abs, avx512_mean_rel] = compute_error(avx512, stdv);
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     auto [avx_mean_abs, avx_max_abs, avx_mean_rel] = compute_error(avx, stdv);
 #endif
@@ -83,6 +89,9 @@ int main() {
     std::cout << std::scientific;
     double avgQ3_ns = tQ3 * 1e6 / numSamples;
     double avgSIMD_ns = tSIMD * 1e6 / numSamples;
+#if defined(__AVX512F__)
+    double avgAVX512_ns = tAVX512 * 1e6 / numSamples;
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     double avgAVX_ns = tAVX * 1e6 / numSamples;
 #endif
@@ -90,6 +99,9 @@ int main() {
     std::cout << "Q3(C++20):\t" << tQ3 << " ms\t(avg=" << avgQ3_ns << " ns)\n";
     std::cout << "Q3(SIMD):\t" << tSIMD << " ms\t(avg=" << avgSIMD_ns << " ns)\n";
     std::cout << "InvSqrtSIMD:\t" << tINV << " ms\t(avg=" << (tINV * 1e6 / numSamples) << " ns)\n";
+#if defined(__AVX512F__)
+    std::cout << "Q3(AVX512):\t" << tAVX512 << " ms\t(avg=" << avgAVX512_ns << " ns)\n";
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << "Q3(AVX2):\t" << tAVX << " ms\t(avg=" << avgAVX_ns << " ns)\n";
 #endif
@@ -100,12 +112,18 @@ int main() {
     std::cout << "Q3(C++20):\t" << q3_mean_abs << ",\t" << q3_max_abs << ",\t" << q3_mean_rel << '\n';
     std::cout << "Q3(SIMD):\t" << simd_mean_abs << ",\t" << simd_max_abs << ",\t" << simd_mean_rel << '\n';
     std::cout << "InvSqrtSIMD:\t" << inv_mean_abs << ",\t" << inv_max_abs << ",\t" << inv_mean_rel << '\n';
+#if defined(__AVX512F__)
+    std::cout << "Q3(AVX512):\t" << avx512_mean_abs << ",\t" << avx512_max_abs << ",\t" << avx512_mean_rel << '\n';
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << "Q3(AVX2):\t" << avx_mean_abs << ",\t" << avx_max_abs << ",\t" << avx_mean_rel << '\n';
 #endif
 
      std::cout << '\n' << "Checksums -> Q3 (C++20): " << checksum(q3)
               << ", Q3(SIMD): " << checksum(simd) << ", InvSqrtSIMD: " << checksum(inv);
+#if defined(__AVX512F__)
+    std::cout << ", Q3(AVX512): " << checksum(avx512);
+#endif
 #if defined(__AVX__) && defined(__AVX2__)
     std::cout << ", Q3(AVX2): " << checksum(avx);
 #endif

@@ -49,8 +49,10 @@ namespace fisq {
     // The AVX2 implementation is only available when the compiler supports
     // the corresponding instruction set.  Guard the declaration to avoid
     // unresolved symbols on targets that cannot compile it.
-#if defined(__AVX__) && defined(__AVX2__)
+#if defined(__AVX512F__)
     [[nodiscard]] float FastInverseSqrtAVX2(float number);
+    [[nodiscard]] float FastInverseSqrtAVX512(float number);
+    inline void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n);
 #endif
 
 } // namespace fisq

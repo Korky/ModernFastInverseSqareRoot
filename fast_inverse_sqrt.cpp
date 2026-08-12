@@ -8,7 +8,7 @@
 // Intrinsic headers – included before the namespace to avoid namespaced
 // declarations of global intrinsics.
 #include <xmmintrin.h> // SSE intrinsics (SSE3)
-#if defined(__AVX__) && defined(__AVX2__)
+#if defined(__AVX512F__)
 #include <immintrin.h>
 #endif
 
@@ -44,7 +44,7 @@ namespace fisq {
     // ------------------------------------------------------------------
     // AVX2 implementation – only compiled when the target supports AVX2.
     // ------------------------------------------------------------------
-#if defined(__AVX__) && defined(__AVX2__)
+#if defined(__AVX512F__)
 
 namespace fisq {
 
@@ -67,5 +67,55 @@ namespace fisq {
         return res[0];
     }
 
+    [[nodiscard]] float FastInverseSqrtAVX512(float number) {
+      /* 1. Broadcast the scalar to a 512‑bit vector */
+      const __m512 input = _mm512_set1_ps(number);
+
+      /* 2. Rough estimate: 28‑bit accuracy (latency ~3 cycles) */
+      __m512 approx = _mm512_rsqrt14_ps(input); // 1/√x, 14‑bit accurate
+
+      /* Constants – these can be static const, compiler will hoist them */
+      static const __m512 half = _mm512_set1_ps(0.5f);
+      static const __m512 three = _mm512_set1_ps(1.5f);
+
+      /* 3. Newton‑Raphson refinement
+         y_new = y * (3 – x*y²) / 2
+         We use fused multiply‑add to collapse two multiplies and one add into a
+         single instruction.
+      */
+      const __m512 approx_sq = _mm512_mul_ps(approx, approx); // y²
+      /*   mult = 0.5 * x * y²  (fused: 0.5*x*y²)                      */
+      const __m512 mult = _mm512_fmadd_ps(input, approx_sq, half);
+      const __m512 nr = _mm512_sub_ps(three, mult);     // 1.5 – 0.5*x*y²
+      const __m512 refined = _mm512_mul_ps(approx, nr); // y * (1.5 – 0.5*x*y²)
+
+      /* 4. Extract the first lane – no memory traffic */
+      return _mm_cvtss_f32(_mm512_extractf32x4_ps(refined, 0));
+    }
+
+    // Vectorised version that takes a 16‑element batch and returns a __m512 of results.
+    [[nodiscard]] inline __m512 FastInverseSqrtAVX512Batch(__m512 input) {
+        /* Rough estimate – 14‑bit accuracy */
+        const __m512 approx = _mm512_rsqrt14_ps(input);
+
+        static const __m512 half  = _mm512_set1_ps(0.5f);
+        static const __m512 three = _mm512_set1_ps(1.5f);
+
+        /* Newton–Raphson refinement */
+        const __m512 approx_sq = _mm512_mul_ps(approx, approx);          // y²
+        const __m512 mult      = _mm512_fmadd_ps(input, approx_sq, half); // 0.5*x*y² (fused)
+        const __m512 nr        = _mm512_sub_ps(three, mult);            // 1.5 – 0.5*x*y²
+        return _mm512_mul_ps(approx, nr);                               // y * (1.5 – 0.5*x*y²)
+    }
+
+    inline void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n)   // n must be a multiple of 16
+    {
+        for (size_t i = 0; i < n; i += 16)
+        {
+            const __m512 input  = _mm512_loadu_ps(src + i);            // load 16 floats
+            const __m512 result = FastInverseSqrtAVX512Batch(input);
+            _mm512_storeu_ps(dst + i, result);                         // store 16 results
+        }
+    }
 } // namespace fisq
 #endif
