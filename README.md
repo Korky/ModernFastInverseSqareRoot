@@ -74,43 +74,45 @@ Typical output (on a recent Intel CPU) looks like this, including timing and err
 ```
 Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 3.3440
+Total elapsed time (ms): 2.1601
 
 Time
-Q3(C++20):      4.4800e-01 ms   (avg=4.4800e-01 ns)
-Q3(SIMD):       1.4953e+00 ms   (avg=1.4953e+00 ns)
-InvSqrtSIMD:    1.1866e+00 ms   (avg=1.1866e+00 ns)
-Std:            1.4007e+00 ms
+Q3(C++20):      4.3970e-01 ms   (avg=4.3970e-01 ns)
+Q3(SIMD):       2.9590e-01 ms   (avg=2.9590e-01 ns)
+RSqrt(SIMD):    1.0796e+00 ms   (avg=1.0796e+00 ns)
+Std:            1.4245e+00 ms
 
 Error metrics
                 mean_abs,               max_abs,                mean_rel
 Q3(C++20):      0x1.f2fc97efe0ce1p-15,  0x1.47ec000000000p-8,   0x1.f82dc4cee149ap-11
 Q3(SIMD):       0x1.3e75bc44bf4cbp-29,  0x1.0000000000000p-21,  0x1.39df740d6494dp-25
-InvSqrtSIMD:    0x1.91c80a2877ee5p-18,  0x1.7a60000000000p-11,  0x1.8ded4c7a47243p-14
+RSqrt(SIMD):    0x1.91c80a2877ee5p-18,  0x1.7a60000000000p-11,  0x1.8ded4c7a47243p-14
 
-Checksums -> Q3 (C++20): 0x1.e85653c9d2000p+15, Q3(SIMD): 0x1.e8cd4b2584400p+15, InvSqrtSIMD: 0x1.e8cd509700000p+15, Std: 0x1.e8cd4b8475800p+15
+Checksums -> Q3 (C++20): 0x1.e85653c9d2000p+15, Q3(SIMD): 0x1.e8cd4b2584400p+15, RSqrt(SIMD): 0x1.e8cd509700000p+15, Std: 0x1.e8cd4b8475800p+15
 ```
 or with AVX
 ```
 Warm-up iterations: 5
 Iterations per function: 1000000
-Total elapsed time (ms): 4.3089
+Total elapsed time (ms): 2.4103
 
 Time
-Q3(C++20):      4.7490e-01 ms   (avg=4.7490e-01 ns)
-Q3(SIMD):       1.1170e+00 ms   (avg=1.1170e+00 ns)
-InvSqrtSIMD:    1.1112e+00 ms   (avg=1.1112e+00 ns)
-Q3(AVX2):       1.4376e+00 ms   (avg=1.4376e+00 ns)
-Std:            1.2794e+00 ms
+Q3(C++20):      4.3460e-01 ms   (avg=4.3460e-01 ns)
+Q3(SIMD):       3.1820e-01 ms   (avg=3.1820e-01 ns)
+Q3(AVX512):     3.0080e-01 ms   (avg=3.0080e-01 ns)
+Q3(AVX2):       2.9710e-01 ms   (avg=2.9710e-01 ns)
+RSqrt(SIMD):    1.1238e+00 ms   (avg=1.1238e+00 ns)
+Std:            1.3604e+00 ms
 
 Error metrics
                 mean_abs,               max_abs,                mean_rel
 Q3(C++20):      0x1.f2fc99f559b3dp-15,  0x1.47ec000000000p-8,   0x1.f82dc8846a928p-11
 Q3(SIMD):       0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
-InvSqrtSIMD:    0x1.91c5b673c4f3cp-18,  0x1.7a60000000000p-11,  0x1.8decd52429cb0p-14
-Q3(AVX2):       0x1.3edbb59ddc1e8p-29,  0x1.0000000000000p-21,  0x1.3a0c87d5ce9e6p-25
+Q3(AVX512):     0x1.fe392e1ef73c1p-30,  0x1.0000000000000p-22,  0x1.f6c5412b8305ep-26
+Q3(AVX2):       0x1.fe392e1ef73c1p-30,  0x1.0000000000000p-22,  0x1.f6c5412b8305ep-26
+RSqrt(SIMD):    0x1.91c5b673c4f3cp-18,  0x1.7a60000000000p-11,  0x1.8decd52429cb0p-14
 
-Checksums -> Q3 (C++20): 0x1.e85653b85bc00p+15, Q3(SIMD): 0x1.e8cd4b14cba00p+15, InvSqrtSIMD: 0x1.e8cd50d000000p+15, Q3(AVX2): 0x1.e8cd4b14cba00p+15, Std: 0x1.e8cd4b7383a00p+15
+Checksums -> Q3 (C++20): 0x1.e85653b85bc00p+15, Q3(SIMD): 0x1.e8cd4b14cba00p+15, RSqrt(SIMD): 0x1.e8cd50d000000p+15, Q3(AVX512): 0x1.e8cd4b6c63c00p+15, Q3(AVX2): 0x1.e8cd4b6c63c00p+15, Std: 0x1.e8cd4b7383a00p+15
 ```
 
 The benchmark demonstrates that the SIMD variant is roughly 30 % faster than the classic implementation and comparable to the standard library.

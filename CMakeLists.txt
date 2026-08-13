@@ -43,6 +43,5 @@ target_compile_options(fisq
         # --- Remove old SSE/AVX2 flags – they are implied by AVX512
         # (But if you need to keep them for other targets, just comment this out.)
         # "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-msse3>"
-        # "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-mavx2>"
+        # "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-mavx512f>"
 )
-

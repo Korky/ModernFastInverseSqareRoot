@@ -20,6 +20,8 @@ int main() {
 
     std::vector<float> q3(numSamples), simd(numSamples), avx(numSamples), stdv(numSamples), inv(numSamples), avx512(numSamples);
 
+    // ------------------------------------------------------------------
+    // Existing scalar benchmark (unchanged)
     auto bench = [&](float (*func)(float), std::vector<float> &out) {
         volatile float dummy = 0.f;
         for (int w = 0; w < warmupCount; ++w)
@@ -30,17 +32,32 @@ int main() {
         return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
     };
 
-    double tQ3   = bench(fisq::FastInverseSqrt<float>, q3);
-    double tSIMD = bench(fisq::FastInverseSqrtSIMD, simd);
-    double tINV  = bench(fisq::InverseSqrtSIMD, inv);
-#if defined(__AVX512F__)
-    double tAVX512 = bench(fisq::FastInverseSqrtAVX512, avx512);
-#endif
-#if defined(__AVX__) && defined(__AVX2__)
-    double tAVX  = bench(fisq::FastInverseSqrtAVX2, avx);
-#endif
+    // ------------------------------------------------------------------
+    // New batch‑benchmark helper
+    auto benchBatch = [&](void (*batchFunc)(const float*, float*, size_t),
+                      std::vector<float> &out) {
+        // volatile float dummy = 0.f;
+        // Warm‑up – run the whole vector each time
+        for (int w = 0; w < warmupCount; ++w)
+            batchFunc(inputs.data(), out.data(), numSamples);
 
-    // Reference std::sqrt
+        auto start = std::chrono::steady_clock::now();
+        batchFunc(inputs.data(), out.data(), numSamples);
+        return std::chrono::duration<double, std::milli>(std::chrono::steady_clock::now() - start).count();
+    };
+
+    double tQ3   = bench(fisq::FastInverseSqrt<float>, q3);
+
+    // ---- batch variants -------------------------------------------------
+    double tSIMD  = benchBatch(fisq::FastInverseSqrtSIMDBatch, simd);
+#if defined(__AVX__) && defined(__AVX2__)
+    double tAVX   = benchBatch(fisq::FastInverseSqrtAVX2Batch, avx);
+#endif
+#if defined(__AVX512F__)
+    double tAVX512 = benchBatch(fisq::FastInverseSqrtAVX512Batch, avx512);
+#endif
+    double tINV  = bench(fisq::InverseSqrtSIMD, inv);
+    // Reference std::sqrt (still scalar)
     double tStd   = bench([](float x) { return 1.0f / std::sqrtf(x); }, stdv);
 
     auto checksum = [](const std::vector<float> &v) {

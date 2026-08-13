@@ -38,53 +38,37 @@ namespace fisq {
         return y;
     }
 
-    /// SIMD accelerated fast inverse square root using Newton–Raphson method with SSE intrinsics.
+    /// SIMD accelerated inverse square root using architecture-specific SIMD intrinsics directly.
     ///
     /// @param number The value to compute the inverse sqrt of.
     /// @return Approximate 1/sqrt(number).
-    [[nodiscard]] float FastInverseSqrtSIMD(float number);
+    [[nodiscard]] float InverseSqrtSIMD(float number);
 
     /// SIMD accelerated fast inverse square root using Newton–Raphson method with SSE intrinsics.
     ///
     /// @param src Pointer to input array of floats.
     /// @param dst Pointer to output array of floats (must be preallocated).
     /// @param n Number of elements to process (must be a multiple of 4).
-    inline void FastInverseSqrtSIMDBatch(const float* src, float* dst, size_t n);
-    
-    /// SIMD accelerated inverse square root using architecture-specific SIMD intrinsics directly.
-    ///
-    /// @param number The value to compute the inverse sqrt of.
-    /// @return Approximate 1/sqrt(number).
-    [[nodiscard]] float InverseSqrtSIMD(float number);
+    void FastInverseSqrtSIMDBatch(const float* src, float* dst, size_t n);
     
     // The AVX2 & AVX512 implementation is only available when the compiler supports
     // the corresponding instruction set.  Guard the declaration to avoid
     // unresolved symbols on targets that cannot compile it.
 #if defined(__AVX__) && defined(__AVX2__)
-    /// AVX2 accelerated fast inverse square root using Newton–Raphson method with AVX2 intrinsics.
-    /// 
-    /// @param number The value to compute the inverse sqrt of.
-    /// @return Approximate 1/sqrt(number). 
-    [[nodiscard]] float FastInverseSqrtAVX2(float number);
     /// AVX2 accelerated fast inverse square root for batch processing using Newton–Raphson method with AVX2 intrinsics.
     ///
     /// @param src Pointer to input array of floats.
     /// @param dst Pointer to output array of floats (must be preallocated).
     /// @param n Number of elements to process (must be a multiple of 8).
-    inline void FastInverseSqrtAVX2Batch(const float* src, float* dst, size_t n);
+    void FastInverseSqrtAVX2Batch(const float* src, float* dst, size_t n);
 #endif
 #if defined(__AVX512F__)
-    /// AVX512 accelerated fast inverse square root using Newton–Raphson method with AVX512 intrinsics.
-    /// 
-    /// @param number The value to compute the inverse sqrt of.
-    /// @return Approximate 1/sqrt(number).
-    [[nodiscard]] float FastInverseSqrtAVX512(float number);
     /// AVX512 accelerated fast inverse square root for batch processing using Newton–Raphson method with AVX512 intrinsics.
     ///
     /// @param src Pointer to input array of floats.
     /// @param dst Pointer to output array of floats (must be preallocated).
     /// @param n Number of elements to process (must be a multiple of 16).
-    inline void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n);
+    void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n);
 #endif
 
 } // namespace fisq
