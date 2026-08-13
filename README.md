@@ -1,6 +1,6 @@
-# ModernFastInverseSquareRoot
+# Modern Fast Inverse Square Root
 
-This repository contains a **C++20** implementation of the classic Quake III fast inverse square root algorithm, along with an SSE‑based SIMD variant.  The goal is to provide a lightweight, high‑performance helper that can be dropped into other projects.
+This repository contains a **C++20** implementation of the classic Quake III fast inverse square root algorithm, along with an SSE‑based SIMD variant. While the project was originally started as a way to modernize a interesting piece of programming history it has started to turn into a exploration into SIMD ideas and techniques, also testing and benchmarking local Coding Assistants (Self Hosted LLMs) capability of optimizing algorithms.
 
 ## Build Instructions
 
