@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.12)
 
-project(ModernFastInverseSqareRoot LANGUAGES CXX)
+project(ModernFastInverseSquareRoot LANGUAGES CXX)
 
 # Enable generation of compile_commands.json for clangd support.
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
@@ -31,9 +31,9 @@ target_compile_options(fisq
          # --- MSVC (cl.exe or clang-cl) ------------------------------------
         # Use AVX‑512 + FMA3 for *any* MSVC toolset.  If your clang‑cl
         # version is older than ~15.x, you can fall back to /QxHost.
-        "$<$<CXX_COMPILER_ID:MSVC>:/arch:AVX512>"
+        # "$<$<CXX_COMPILER_ID:MSVC>:/arch:AVX512>"
         # (Optional) if you want the fallback:
-        "$<$<AND:$<CXX_COMPILER_ID:MSVC>, $<NOT:$<TARGET_PROPERTY:HAS_AVX512>>>:/QxHost>"
+        #  "$<$<AND:$<CXX_COMPILER_ID:MSVC>, $<NOT:$<TARGET_PROPERTY:HAS_AVX512>>>:/QxHost>"
 
         # --- GCC / Clang on Linux/macOS ----------------------------------
         "$<$<OR:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-march=native>"

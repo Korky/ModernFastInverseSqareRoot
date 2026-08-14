@@ -49,7 +49,7 @@ namespace fisq {
     /// @param src Pointer to input array of floats.
     /// @param dst Pointer to output array of floats (must be preallocated).
     /// @param n Number of elements to process (must be a multiple of 4).
-    void FastInverseSqrtSIMDBatch(const float* src, float* dst, size_t n);
+    void FastInverseSqrtBatch(const float* src, float* dst, size_t n);
     
     // The AVX2 & AVX512 implementation is only available when the compiler supports
     // the corresponding instruction set.  Guard the declaration to avoid

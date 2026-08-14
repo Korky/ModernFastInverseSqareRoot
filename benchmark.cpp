@@ -49,7 +49,7 @@ int main() {
     double tQ3   = bench(fisq::FastInverseSqrt<float>, q3);
 
     // ---- batch variants -------------------------------------------------
-    double tSIMD  = benchBatch(fisq::FastInverseSqrtSIMDBatch, simd);
+    double tSIMD  = benchBatch(fisq::FastInverseSqrtBatch, simd);
 #if defined(__AVX__) && defined(__AVX2__)
     double tAVX   = benchBatch(fisq::FastInverseSqrtAVX2Batch, avx);
 #endif

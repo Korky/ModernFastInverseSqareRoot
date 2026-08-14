@@ -3,9 +3,10 @@
 #include "fast_inverse_sqrt.hpp"
 // Include SIMD intrinsic headers; conditionally compiled based on target architecture.
 #include <xmmintrin.h> // SSE intrinsics
-#if defined(__AVX512F__)
+#if defined(__AVX__) && defined(__AVX2__)
 #include <immintrin.h>
 #endif
+
 
 namespace fisq {
 
@@ -25,18 +26,40 @@ namespace fisq {
         // Newton–Raphson refinement: y * (3 – n*y²) / 2
         const __m128 number_half = _mm_mul_ps(number, half);
         const __m128 approx_sq   = _mm_mul_ps(approx, approx);
-        const __m128 mult        = _mm_mul_ps(number_half, approx_sq);
-        const __m128 nr          = _mm_sub_ps(three, mult);
-        return _mm_mul_ps(approx, nr);
+        const __m128 newt_raph = _mm_fnmadd_ps(number_half, approx_sq, three);
+        return _mm_mul_ps(approx, newt_raph);
     }
-    void FastInverseSqrtSIMDBatch(const float* src, float* dst, size_t n) { // n must be a multiple of 4
+#if defined(__AVX__) && defined(__AVX2__)
+    [[nodiscard]] inline __m256 FastInverseSqrtAVX2Batch(__m256 input);
+#endif
+#if defined(__AVX512F__)
+    [[nodiscard]] inline __m512 FastInverseSqrtAVX512Batch(__m512 input);
+#endif
+    void FastInverseSqrtBatch(const float* src, float* dst, size_t n) { // n must be a multiple of 4
+
+#if defined(__AVX512F__)
+        for (size_t i = 0; i < n; i += 16) {
+            const __m512 input  = _mm512_loadu_ps(src + i); // Load 16 floats
+            const __m512 result = FastInverseSqrtAVX512Batch(input);
+            _mm512_storeu_ps(dst + i, result); // Store 16 results
+        }
+#elif defined(__AVX__) && defined(__AVX2__)
+        for (size_t i = 0; i < n; i += 8) {
+            const __m256 input  = _mm256_loadu_ps(src + i); // Load 8 floats
+            const __m256 result = FastInverseSqrtAVX2Batch(input);
+            _mm256_storeu_ps(dst + i, result); // Store 8 results
+        }
+#else
         for (size_t i = 0; i < n; i += 4) {
             const __m128 input  = _mm_loadu_ps(src + i); // Load 4 floats
             const __m128 result = FastInverseSqrtSIMDBatch(input);
             _mm_storeu_ps(dst + i, result); // Store 4 results
         }
+#endif
+    
     }
 } // namespace fisq
+
 
 // ------------------------------------------------------------------
 // AVX2 implementation – only compiled when the target supports AVX2.
@@ -54,9 +77,8 @@ namespace fisq {
 
         const __m256 input_half  = _mm256_mul_ps(input, half);
         const __m256 approx_sq   = _mm256_mul_ps(approx, approx);
-        const __m256 mult        = _mm256_mul_ps(input_half, approx_sq);
-        const __m256 nr          = _mm256_sub_ps(three, mult);
-        return _mm256_mul_ps(approx, nr);
+        const __m256 newt_raph = _mm256_fnmadd_ps(input_half, approx_sq, three);
+        return _mm256_mul_ps(approx, newt_raph);
     }
 
     void FastInverseSqrtAVX2Batch(const float* src, float* dst, size_t n) // n must be a multiple of 8
@@ -79,9 +101,8 @@ namespace fisq {
 
         const __m512 input_half = _mm512_mul_ps(input, half);
         const __m512 approx_sq  = _mm512_mul_ps(approx, approx); 
-        const __m512 mult       = _mm512_mul_ps(input_half, approx_sq); 
-        const __m512 nr         = _mm512_sub_ps(three, mult); 
-        return _mm512_mul_ps(approx, nr);
+        const __m512 newt_raph = _mm512_fnmadd_ps(input_half, approx_sq, three);
+        return _mm512_mul_ps(approx, newt_raph);
     }
 
     void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n) // n must be a multiple of 16
