@@ -1,4 +1,4 @@
-﻿{
+{
     "version": 3,
     "configurePresets": [
         {
@@ -11,7 +11,6 @@
                 "CMAKE_CXX_STANDARD": "20",
                 "CMAKE_EXPORT_COMPILE_COMMANDS": "ON",
                 "CMAKE_CXX_FLAGS": "-Wextra -Werror"
-                
             }
         },
         {
@@ -128,6 +127,14 @@
                 "lhs": "${hostSystemName}",
                 "rhs": "Darwin"
             }
+        }
+    ],
+    "testPresets": [
+        {
+            "name": "FastInverseSqrtTest-x64",
+            "description": "",
+            "displayName": "FastInverseSqrtTest",
+            "configurePreset": "x64-release"
         }
     ]
 }

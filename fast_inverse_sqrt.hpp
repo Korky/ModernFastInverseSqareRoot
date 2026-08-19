@@ -7,6 +7,7 @@
 #include <cstdint>
 #include <concepts>
 
+
 // Namespace for fast inverse square root implementations.
 // The namespace encapsulates the functions to avoid polluting the global namespace.
 // The functions are designed to be efficient and leverage SIMD instructions when available.
@@ -38,7 +39,7 @@ namespace fisq {
         return y;
     }
 
-    /// SIMD accelerated inverse square root using architecture-specific SIMD intrinsics directly.
+    /// SIMD accelerated inverse square root using direct scalar intrinsics.
     ///
     /// @param number The value to compute the inverse sqrt of.
     /// @return Approximate 1/sqrt(number).
@@ -71,4 +72,26 @@ namespace fisq {
     void FastInverseSqrtAVX512Batch(const float* src, float* dst, size_t n);
 #endif
 
+    /// SIMD traits to abstract over different SIMD vector types.
+    /// This allows for a unified interface to load, store, and compute inverse square roots
+    /// across different SIMD widths (SSE, AVX, AVX512).
+    template<typename Vec>
+    struct SIMDTraits;
+
+    /// Batch processing of inverse square root using SIMD.
+    /// This function processes an array of floats in batches, leveraging SIMD instructions
+    /// for improved performance. The implementation is specialized for different SIMD widths
+    /// (SSE, AVX, AVX512) based on the target architecture.
+    template <typename Vec>
+    void FastInverseSqrtBatch(const float *src, float *dst, size_t n) {
+      constexpr size_t Width = SIMDTraits<Vec>::width;
+
+      static_assert(Width > 0);
+
+      for (size_t i = 0; i < n; i += Width) {
+        const Vec input = SIMDTraits<Vec>::load(src + i);
+        const Vec result = SIMDTraits<Vec>::inverse_sqrt(input);
+        SIMDTraits<Vec>::store(dst + i, result);
+      }
+    }
 } // namespace fisq
